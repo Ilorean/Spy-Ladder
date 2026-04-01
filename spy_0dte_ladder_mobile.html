@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SPY Ladder">
+<title>SPY Ladder</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c0f;
+    --surface: #111318;
+    --surface2: #181c23;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.13);
+    --text: #e8eaf0;
+    --muted: #6b7280;
+    --dim: #2e333d;
+    --green: #22d3a0;
+    --green-dim: rgba(34,211,160,0.08);
+    --green-border: rgba(34,211,160,0.22);
+    --amber-dim: rgba(251,191,36,0.08);
+    --amber-border: rgba(251,191,36,0.2);
+    --purple: #a78bfa;
+    --purple-dim: rgba(167,139,250,0.1);
+    --scalp-bg: rgba(96,165,250,0.1);   --scalp-c: #93c5fd;
+    --secure-bg: rgba(34,211,160,0.1);  --secure-c: #6ee7c6;
+    --r1-bg: rgba(251,191,36,0.1);      --r1-c: #fcd34d;
+    --r2-bg: rgba(251,113,133,0.1);     --r2-c: #fca5a5;
+    --r3-bg: rgba(167,139,250,0.1);     --r3-c: #c4b5fd;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    min-height: 100vh;
+    overscroll-behavior: none;
+  }
+
+  body { padding: env(safe-area-inset-top, 16px) 0 calc(env(safe-area-inset-bottom, 0px) + 24px); }
+
+  .page { padding: 0 16px; max-width: 480px; margin: 0 auto; }
+
+  /* ── Header ── */
+  header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 16px 14px;
+    border-bottom: 0.5px solid var(--border2);
+    margin-bottom: 20px;
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 10;
+  }
+
+  .logo {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    color: var(--green);
+    padding: 4px 9px;
+    border: 1px solid var(--green-border);
+    border-radius: 4px;
+    background: var(--green-dim);
+    text-transform: uppercase;
+  }
+
+  header h1 {
+    font-family: var(--mono);
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text);
+    flex: 1;
+  }
+
+  .header-date {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+  }
+
+  /* ── Inputs ── */
+  .inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+
+  .input-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 14px 16px 12px;
+    position: relative;
+  }
+
+  .input-card:focus-within { border-color: rgba(34,211,160,0.4); }
+
+  .input-card label {
+    display: block;
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.13em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .input-card input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: var(--mono);
+    font-size: 30px;
+    font-weight: 500;
+    color: var(--text);
+    padding: 0;
+    -webkit-appearance: none;
+  }
+
+  .input-card input:focus { color: var(--green); }
+  .input-card .unit {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--dim);
+    margin-top: 4px;
+    display: block;
+  }
+
+  /* ── Summary pills ── */
+  .summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .sum-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+  }
+
+  .sum-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; margin-bottom: 5px; }
+  .sum-val   { font-family: var(--mono); font-size: 20px; font-weight: 500; }
+  .sum-val.green { color: var(--green); }
+
+  /* ── Section header ── */
+  .sec-title {
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .sec-title::after { content: ''; flex: 1; height: 0.5px; background: var(--border); }
+
+  /* ── Recovery banner ── */
+  .recovery-banner {
+    border-radius: var(--radius);
+    padding: 13px 15px;
+    font-size: 13px;
+    line-height: 1.65;
+    margin-bottom: 12px;
+    border: 0.5px solid;
+  }
+  .recovery-banner.covered { background: var(--green-dim); border-color: var(--green-border); color: #6ee7c6; }
+  .recovery-banner.partial { background: var(--amber-dim); border-color: var(--amber-border); color: #fcd34d; }
+
+  .rec-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 20px; }
+  .rec-stat { background: var(--surface2); border-radius: 8px; padding: 10px 13px; }
+  .rec-stat-label { font-size: 9px; font-family: var(--mono); color: var(--muted); margin-bottom: 4px; letter-spacing: 0.08em; text-transform: uppercase; }
+  .rec-stat-val { font-family: var(--mono); font-size: 16px; font-weight: 500; }
+  .rec-stat-val.green { color: var(--green); }
+
+  /* ── Tier cards ── */
+  .tier-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 8px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 6px 12px;
+    align-items: start;
+  }
+
+  .tier-card.runner { border-color: rgba(167,139,250,0.15); }
+
+  .tier-top { display: flex; align-items: center; gap: 8px; grid-column: 1 / -1; margin-bottom: 4px; }
+
+  .badge {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    padding: 3px 9px;
+    border-radius: 3px;
+    text-transform: uppercase;
+  }
+
+  .b-scalp  { background: var(--scalp-bg);  color: var(--scalp-c); }
+  .b-secure { background: var(--secure-bg); color: var(--secure-c); }
+  .b-r1     { background: var(--r1-bg);     color: var(--r1-c); }
+  .b-r2     { background: var(--r2-bg);     color: var(--r2-c); }
+  .b-r3     { background: var(--r3-bg);     color: var(--r3-c); }
+
+  .free-tag {
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    padding: 2px 7px;
+    border-radius: 3px;
+    background: var(--purple-dim);
+    color: var(--purple);
+    text-transform: uppercase;
+  }
+
+  .tier-main {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+
+  .tier-price {
+    font-family: var(--mono);
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .tier-gain {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .tier-right { text-align: right; }
+
+  .tier-ctrs {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .tier-ctrs-label { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+
+  .tier-bottom {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 8px;
+    border-top: 0.5px solid var(--border);
+    margin-top: 4px;
+  }
+
+  .tier-proceeds-label { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+  .tier-proceeds-val   { font-family: var(--mono); font-size: 14px; font-weight: 500; }
+
+  .tier-cumul { text-align: right; }
+  .tier-cumul-label { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+  .tier-cumul-val   { font-family: var(--mono); font-size: 14px; font-weight: 500; }
+  .tier-cumul-val.green { color: var(--green); }
+
+  .bar-wrap { height: 3px; background: var(--dim); border-radius: 2px; margin-top: 5px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 2px; background: var(--green); }
+
+  /* ── Runner summary ── */
+  .runner-total {
+    background: var(--green-dim);
+    border: 0.5px solid var(--green-border);
+    border-radius: var(--radius);
+    padding: 13px 16px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: #6ee7c6;
+    line-height: 1.65;
+  }
+
+  /* ── Framework strip ── */
+  .fw-strip {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .fw-item { text-align: center; flex: 1; }
+  .fw-pct  { font-family: var(--mono); font-size: 14px; font-weight: 600; }
+  .fw-gain { font-family: var(--mono); font-size: 9px; color: var(--muted); margin-top: 2px; }
+  .fw-name { font-size: 9px; color: var(--muted); margin-top: 1px; }
+
+  .sep { width: 0.5px; background: var(--border); margin: 4px 0; }
+
+  footer {
+    margin-top: 28px;
+    padding: 14px 16px 0;
+    border-top: 0.5px solid var(--border);
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* Number input cleanup */
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+  input[type=number] { -moz-appearance: textfield; }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="logo">0DTE</span>
+  <h1>SPY Ladder</h1>
+  <span class="header-date" id="hdate"></span>
+</header>
+
+<div class="page">
+
+  <div class="inputs">
+    <div class="input-card">
+      <label>Contracts</label>
+      <input type="number" id="contracts" value="100" min="1" step="1" inputmode="numeric" oninput="calc()">
+      <span class="unit">contracts</span>
+    </div>
+    <div class="input-card">
+      <label>Entry $</label>
+      <input type="number" id="entry" value="0.25" min="0.01" step="0.01" inputmode="decimal" oninput="calc()">
+      <span class="unit">per contract</span>
+    </div>
+  </div>
+
+  <div class="summary" id="summary"></div>
+
+  <div class="sec-title">Framework</div>
+  <div class="fw-strip">
+    <div class="fw-item"><div class="fw-pct" style="color:var(--scalp-c)">30%</div><div class="fw-gain">+30%</div><div class="fw-name">Scalp</div></div>
+    <div class="sep"></div>
+    <div class="fw-item"><div class="fw-pct" style="color:var(--secure-c)">30%</div><div class="fw-gain">+60%</div><div class="fw-name">Secure</div></div>
+    <div class="sep"></div>
+    <div class="fw-item"><div class="fw-pct" style="color:var(--r1-c)">20%</div><div class="fw-gain">+120%</div><div class="fw-name">R1</div></div>
+    <div class="sep"></div>
+    <div class="fw-item"><div class="fw-pct" style="color:var(--r2-c)">10%</div><div class="fw-gain">+200%</div><div class="fw-name">R2</div></div>
+    <div class="sep"></div>
+    <div class="fw-item"><div class="fw-pct" style="color:var(--r3-c)">10%</div><div class="fw-gain">+500%</div><div class="fw-name">R3</div></div>
+  </div>
+
+  <div class="sec-title">Cost recovery</div>
+  <div id="recovery-banner"></div>
+  <div class="rec-stats" id="rec-stats"></div>
+
+  <div class="sec-title">Sell order ladder</div>
+  <div id="ladder"></div>
+
+  <div class="sec-title">Runner upside</div>
+  <div id="runner-summary"></div>
+
+  <footer>
+    <span>SPY 0DTE · Fixed Framework</span>
+    <span id="fdate"></span>
+  </footer>
+
+</div>
+
+<script>
+const TIERS = [
+  { label:'Quick scalp',   badge:'b-scalp',  alloc:30, gain:30,  recovery:true  },
+  { label:'Secure profit', badge:'b-secure', alloc:30, gain:60,  recovery:true  },
+  { label:'Runner 1',      badge:'b-r1',     alloc:20, gain:120, recovery:false },
+  { label:'Runner 2',      badge:'b-r2',     alloc:10, gain:200, recovery:false },
+  { label:'Runner 3',      badge:'b-r3',     alloc:10, gain:500, recovery:false },
+];
+
+const fd = n => '$' + n.toFixed(2);
+const fk = n => n >= 1000 ? '$' + (n/1000).toFixed(2) + 'k' : '$' + n.toFixed(0);
+const now = new Date();
+const dateStr = now.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+document.getElementById('hdate').textContent = dateStr;
+document.getElementById('fdate').textContent = dateStr;
+
+function calc() {
+  const contracts = Math.max(1, parseInt(document.getElementById('contracts').value) || 100);
+  const entry     = Math.max(0.01, parseFloat(document.getElementById('entry').value) || 0.25);
+  const totalCost = contracts * entry * 100;
+
+  document.getElementById('summary').innerHTML = `
+    <div class="sum-card"><div class="sum-label">Total cost</div><div class="sum-val">${fk(totalCost)}</div></div>
+    <div class="sum-card"><div class="sum-label">Per contract</div><div class="sum-val">${fd(entry)}</div></div>
+  `;
+
+  const tiers = TIERS.map(t => ({
+    ...t,
+    ctrs: Math.round(contracts * t.alloc / 100),
+    price: entry * (1 + t.gain / 100),
+    get proceeds() { return this.ctrs * this.price * 100; }
+  }));
+
+  let cumul = 0, recProceeds = 0, recCtrs = 0, freeCtrs = 0, coveredAt = -1;
+  tiers.forEach((t, i) => {
+    cumul += t.proceeds;
+    if (t.recovery) { recProceeds += t.proceeds; recCtrs += t.ctrs; }
+    else freeCtrs += t.ctrs;
+    if (coveredAt < 0 && cumul >= totalCost) coveredAt = i;
+  });
+
+  const covered = recProceeds >= totalCost;
+  const surplus = recProceeds - totalCost;
+  const recPct  = Math.min(100, recProceeds / totalCost * 100);
+
+  document.getElementById('recovery-banner').innerHTML = covered
+    ? `<div class="recovery-banner covered">✓ Cost basis recovered from scalp + secure alone.<br>Collected <strong>${fk(recProceeds)}</strong> vs <strong>${fk(totalCost)}</strong> — surplus <strong>+${fk(surplus)}</strong>.<br>Remaining <strong>${freeCtrs} contracts are free.</strong></div>`
+    : `<div class="recovery-banner partial">Scalp + secure recover <strong>${fk(recProceeds)}</strong> of <strong>${fk(totalCost)}</strong> (${recPct.toFixed(0)}%).<br>Shortfall covered when <strong>${coveredAt >= 0 ? TIERS[coveredAt].label : 'Runner 3'}</strong> fills.</div>`;
+
+  document.getElementById('rec-stats').innerHTML = `
+    <div class="rec-stat"><div class="rec-stat-label">Recovery contracts</div><div class="rec-stat-val">${recCtrs} <span style="font-size:11px;color:var(--muted)">(${(recCtrs/contracts*100).toFixed(0)}%)</span></div></div>
+    <div class="rec-stat"><div class="rec-stat-label">Free runners</div><div class="rec-stat-val green">${freeCtrs} <span style="font-size:11px;color:var(--muted)">(${(freeCtrs/contracts*100).toFixed(0)}%)</span></div></div>
+    <div class="rec-stat"><div class="rec-stat-label">Recovery proceeds</div><div class="rec-stat-val">${fk(recProceeds)}</div></div>
+    <div class="rec-stat"><div class="rec-stat-label">${covered?'Surplus':'Shortfall'}</div><div class="rec-stat-val ${covered?'green':''}">${covered?'+':'-'}${fk(Math.abs(surplus))}</div></div>
+  `;
+
+  cumul = 0;
+  document.getElementById('ladder').innerHTML = tiers.map(t => {
+    cumul += t.proceeds;
+    const pct = Math.min(100, cumul / totalCost * 100);
+    const isFree = !t.recovery;
+    return `
+    <div class="tier-card${isFree?' runner':''}">
+      <div class="tier-top">
+        <span class="badge ${t.badge}">${t.label}</span>
+        ${isFree ? '<span class="free-tag">free</span>' : ''}
+      </div>
+      <div>
+        <div class="tier-main">
+          <span class="tier-price">${fd(t.price)}</span>
+          <span class="tier-gain">+${t.gain}%</span>
+        </div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:2px;">limit sell price</div>
+      </div>
+      <div class="tier-right">
+        <div class="tier-ctrs">${t.ctrs}</div>
+        <div class="tier-ctrs-label">contracts</div>
+      </div>
+      <div class="tier-bottom">
+        <div>
+          <div class="tier-proceeds-label">proceeds</div>
+          <div class="tier-proceeds-val">${fk(t.proceeds)}</div>
+        </div>
+        <div class="tier-cumul">
+          <div class="tier-cumul-label">cumulative</div>
+          <div class="tier-cumul-val${pct>=100?' green':''}">${fk(cumul)}</div>
+          <div class="bar-wrap" style="width:80px"><div class="bar-fill" style="width:${pct.toFixed(1)}%"></div></div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const runners = tiers.filter(t => !t.recovery);
+  const totalRunnerProceeds = runners.reduce((s,t) => s + t.proceeds, 0);
+  let rCumul = 0;
+  document.getElementById('runner-summary').innerHTML =
+    `<div class="runner-total">${freeCtrs} contracts with zero cost basis. If all runners fill → <strong>+${fk(totalRunnerProceeds)}</strong> pure profit.</div>` +
+    runners.map(t => {
+      rCumul += t.proceeds;
+      return `
+      <div class="tier-card runner">
+        <div class="tier-top">
+          <span class="badge ${t.badge}">${t.label}</span>
+          <span class="free-tag">free</span>
+        </div>
+        <div>
+          <div class="tier-main">
+            <span class="tier-price">${fd(t.price)}</span>
+            <span class="tier-gain">+${t.gain}%</span>
+          </div>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:2px;">limit sell price</div>
+        </div>
+        <div class="tier-right">
+          <div class="tier-ctrs">${t.ctrs}</div>
+          <div class="tier-ctrs-label">contracts</div>
+        </div>
+        <div class="tier-bottom">
+          <div>
+            <div class="tier-proceeds-label">proceeds</div>
+            <div class="tier-proceeds-val" style="color:var(--green)">+${fk(t.proceeds)}</div>
+          </div>
+          <div class="tier-cumul">
+            <div class="tier-cumul-label">cumul. profit</div>
+            <div class="tier-cumul-val green">+${fk(rCumul)}</div>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+}
+
+calc();
+</script>
+</body>
+</html>
